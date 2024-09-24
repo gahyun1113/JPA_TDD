@@ -35,4 +35,15 @@ public class UserService {
             throw new RuntimeException("User not found with id: " + id);
         }
     }
+
+    public User updateUser(Long id, String username, String email) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+        user.setUsername(username);
+        user.setEmail(email);
+
+        return userRepository.save(user); // save 메서드를 호출하여 업데이트
+    }
+
 }

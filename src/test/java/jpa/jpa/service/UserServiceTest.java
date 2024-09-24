@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class UserServiceTest {
 
@@ -101,4 +102,35 @@ public class UserServiceTest {
         // 해당 메소드가 호출되지 않았는지 확인
         verify(userRepository, never()).deleteById(userId);
     }
+
+    @DisplayName("기존 사용자 업데이트 테스트 (Update)")
+    @Test
+    public void saveUser_ShouldUpdateExistingUser() {
+        // 기존 엔티티 설정 (ID가 1인 사용자)
+        User existingUser = new User();
+        existingUser.setId(1L);
+        existingUser.setUsername("John");
+        existingUser.setEmail("john@example.com");
+
+        // 저장된 엔티티 찾는 동작에 대한 Mock 설정
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+
+        // 업데이트할 새로운 정보 설정
+        existingUser.setEmail("newemail@example.com");
+
+        // 저장 동작에 대한 Mock 설정
+        when(userRepository.save(existingUser)).thenReturn(existingUser); // 수정된 user 객체를 저장하도록 Mock 설정
+
+        // 서비스 호출
+        User updatedUser = userService.updateUser(1L, "John", "newemail@example.com");
+
+        // 업데이트 결과 검증
+        assertNotNull(updatedUser);
+        assertEquals("John", updatedUser.getUsername());
+        assertEquals("newemail@example.com", updatedUser.getEmail());
+
+        // save 메소드가 한 번 호출되었는지 검증
+        verify(userRepository, times(1)).save(existingUser);
+    }
+
 }
